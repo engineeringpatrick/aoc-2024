@@ -8,7 +8,7 @@
 #include <unordered_set>
 #include <vector>
 
-std::vector<std::vector<int>> readFile(const std::string& filename, std::unordered_map<int, std::unordered_set<int>>& prerequisites) {
+std::vector<std::vector<int>> readFile(const std::string& filename, std::unordered_map<int, std::vector<int>>& prerequisites) {
     std::ifstream file(filename);
     std::vector<std::vector<int>> updates;
     std::string line;
@@ -21,7 +21,7 @@ std::vector<std::vector<int>> readFile(const std::string& filename, std::unorder
         std::getline(iss, n2_str, '|');
         int n1 = stoi(n1_str), n2 = stoi(n2_str);
 
-        prerequisites[n2].insert(n1);
+        prerequisites[n2].push_back(n1);
     }
 
     while (std::getline(file, line)) {
@@ -37,7 +37,7 @@ std::vector<std::vector<int>> readFile(const std::string& filename, std::unorder
     return updates;
 }
 
-int getSum(std::vector<std::vector<int>> updates, std::unordered_map<int, std::unordered_set<int>> prerequisites) {
+int getSum(std::vector<std::vector<int>> updates, std::unordered_map<int, std::vector<int>> prerequisites) {
     int res = 0;
     for(const auto& update: updates) {
         std::unordered_set<int> seen;
@@ -52,19 +52,16 @@ int getSum(std::vector<std::vector<int>> updates, std::unordered_map<int, std::u
             seen.insert(page);
         }
 
-        if(!isUpdateOrdered){
-            std::vector<int> update_copy{update.begin(), update.end()};
-            sort(update_copy.begin(), update_copy.end(), [&prerequisites](int a, int b){
-                return prerequisites[b].contains(a);
-            });
-            res += update_copy[update_copy.size() / 2];
+        if(isUpdateOrdered){
+            std::cout << "update is ordered\n";
+            res += update[update.size() / 2];
         }
     }
     return res;
 }
 
 int main() {
-    std::unordered_map<int, std::unordered_set<int>> prerequisites;
+    std::unordered_map<int, std::vector<int>> prerequisites;
     std::vector<std::vector<int>> updates = readFile("day5/test_input.txt", prerequisites);
 
     std::cout << getSum(updates, prerequisites) << std::endl;
